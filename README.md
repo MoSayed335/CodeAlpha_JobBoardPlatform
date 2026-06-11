@@ -89,7 +89,7 @@ Entity Framework Core is configured to generate the database schema automaticall
 ### Startup Commands
 1. Navigate to the project directory:
    ```powershell
-   cd C:\Users\Mohamed\.gemini\antigravity\scratch\JobBoardPlatform
+   cd ProjectPuth
    ```
 2. Build the application:
    ```powershell
