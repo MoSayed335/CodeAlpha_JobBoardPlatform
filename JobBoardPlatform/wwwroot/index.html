@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobSphere | Premium Job Board Platform</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="logo">
+                <i data-lucide="briefcase" class="logo-icon"></i>
+                <span class="logo-text">JobSphere</span>
+            </div>
+            <nav class="nav-tabs">
+                <button class="nav-tab active" id="tab-candidate" onclick="switchTab('candidate')">
+                    <i data-lucide="search" class="tab-icon"></i> Candidate Portal
+                </button>
+                <button class="nav-tab" id="tab-employer" onclick="switchTab('employer')">
+                    <i data-lucide="building-2" class="tab-icon"></i> Employer Portal
+                </button>
+                <button class="nav-tab" id="tab-admin" onclick="switchTab('admin')">
+                    <i data-lucide="shield-check" class="tab-icon"></i> Admin Dashboard
+                </button>
+            </nav>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- CANDIDATE PORTAL -->
+            <section id="content-candidate" class="portal-section active">
+                <div class="hero-section">
+                    <h1>Find Your Next Dream Career</h1>
+                    <p>Discover opportunities with leading global tech companies, biomedical research centers, and marketing agencies.</p>
+                </div>
+
+                <!-- Job Search & Filters -->
+                <div class="glass-card search-card">
+                    <div class="search-grid">
+                        <div class="input-wrapper">
+                            <i data-lucide="search" class="input-icon"></i>
+                            <input type="text" id="search-keyword" placeholder="Job title, keywords, or company...">
+                        </div>
+                        <div class="input-wrapper">
+                            <i data-lucide="map-pin" class="input-icon"></i>
+                            <input type="text" id="search-location" placeholder="City, state, or remote...">
+                        </div>
+                        <div class="select-wrapper">
+                            <select id="search-jobtype">
+                                <option value="All">All Job Types</option>
+                                <option value="FullTime">Full Time</option>
+                                <option value="PartTime">Part Time</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Remote">Remote</option>
+                                <option value="Internship">Internship</option>
+                            </select>
+                        </div>
+                        <div class="select-wrapper">
+                            <select id="search-status">
+                                <option value="Open">Open Only</option>
+                                <option value="Closed">Closed Only</option>
+                                <option value="All">All Statuses</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="loadJobListings()">
+                            <i data-lucide="search"></i> Find Jobs
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Candidate Context & Registration -->
+                <div class="candidate-header-bar">
+                    <div class="user-selector-card glass-card">
+                        <div class="selector-left">
+                            <i data-lucide="user" class="selector-icon"></i>
+                            <div>
+                                <label for="candidate-select">Acting Candidate:</label>
+                                <select id="candidate-select" onchange="onCandidateSelected()"></select>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="openModal('register-candidate-modal')">
+                            <i data-lucide="user-plus"></i> New Profile
+                        </button>
+                    </div>
+
+                    <div class="resume-upload-card glass-card hidden" id="resume-section">
+                        <div class="selector-left">
+                            <i data-lucide="file-up" class="selector-icon"></i>
+                            <div>
+                                <label>Resume Management:</label>
+                                <select id="resume-select"></select>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="openModal('upload-resume-modal')">
+                            <i data-lucide="upload"></i> Upload Resume
+                        </button>
+                    </div>
+                </div>
+
+                <div class="portal-grid">
+                    <!-- Left: Job Listings -->
+                    <div class="listings-container">
+                        <h3>Available Openings (<span id="job-count">0</span>)</h3>
+                        <div class="listings-grid" id="listings-list">
+                            <!-- Job items will be dynamically inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Applications History (Only if candidate selected) -->
+                    <div class="applications-container">
+                        <h3>My Applications</h3>
+                        <div class="glass-card applications-card">
+                            <div id="candidate-apps-list" class="apps-list">
+                                <div class="empty-state">
+                                    <i data-lucide="inbox"></i>
+                                    <p>Select a candidate to view application history.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- EMPLOYER PORTAL -->
+            <section id="content-employer" class="portal-section">
+                <div class="employer-header-bar">
+                    <div class="user-selector-card glass-card">
+                        <div class="selector-left">
+                            <i data-lucide="building-2" class="selector-icon"></i>
+                            <div>
+                                <label for="employer-select">Acting Employer:</label>
+                                <select id="employer-select" onchange="onEmployerSelected()"></select>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="openModal('register-employer-modal')">
+                            <i data-lucide="plus"></i> New Employer Profile
+                        </button>
+                    </div>
+
+                    <!-- Notification Area -->
+                    <div class="notification-card glass-card hidden" id="employer-notifications-card">
+                        <div class="notification-header" onclick="toggleNotificationsDropdown()">
+                            <i data-lucide="bell" class="bell-icon"></i>
+                            <span class="badge" id="notification-badge">0</span>
+                            <span class="notification-title">Notifications</span>
+                        </div>
+                        <div class="notifications-dropdown hidden" id="notifications-dropdown">
+                            <div class="dropdown-header">
+                                <span>Recent Notifications</span>
+                                <button class="btn-text" onclick="markAllNotificationsAsRead()">Mark all read</button>
+                            </div>
+                            <div id="notifications-list" class="notifications-list">
+                                <!-- Notifications -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="employer-dashboard-grid" id="employer-dashboard-content">
+                    <!-- Left: Post a Job & Job Management -->
+                    <div class="employer-main">
+                        <div class="flex-row-header">
+                            <h2>Jobs We Posted</h2>
+                            <button class="btn btn-primary" onclick="openModal('post-job-modal')">
+                                <i data-lucide="plus-circle"></i> Post a Job
+                            </button>
+                        </div>
+                        <div class="employer-listings" id="employer-listings">
+                            <!-- Employer Listings -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Applications Received for Selected Job -->
+                    <div class="employer-sidebar">
+                        <h2>Applicants & Tracking</h2>
+                        <div class="glass-card applicants-card" id="applicants-list-card">
+                            <div id="job-applicants-list" class="applicants-list">
+                                <div class="empty-state">
+                                    <i data-lucide="users"></i>
+                                    <p>Select one of your job listings to view candidates who applied.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ADMIN DASHBOARD -->
+            <section id="content-admin" class="portal-section">
+                <!-- Statistics cards -->
+                <div class="admin-stats-grid">
+                    <div class="stats-card glass-card">
+                        <div class="stats-info">
+                            <span class="stats-label">Total Jobs</span>
+                            <span class="stats-value" id="stat-total-jobs">0</span>
+                            <div class="stats-sub">
+                                <span id="stat-open-jobs" class="text-success">0 Open</span> • 
+                                <span id="stat-closed-jobs" class="text-muted">0 Closed</span>
+                            </div>
+                        </div>
+                        <i data-lucide="briefcase" class="stats-icon text-primary"></i>
+                    </div>
+                    <div class="stats-card glass-card">
+                        <div class="stats-info">
+                            <span class="stats-label">Total Applications</span>
+                            <span class="stats-value" id="stat-total-apps">0</span>
+                            <span class="stats-sub text-success">Active listings tracker</span>
+                        </div>
+                        <i data-lucide="file-text" class="stats-icon text-success"></i>
+                    </div>
+                    <div class="stats-card glass-card">
+                        <div class="stats-info">
+                            <span class="stats-label">Employers Registered</span>
+                            <span class="stats-value" id="stat-total-employers">0</span>
+                            <span class="stats-sub">Active corporate accounts</span>
+                        </div>
+                        <i data-lucide="building-2" class="stats-icon text-warning"></i>
+                    </div>
+                    <div class="stats-card glass-card">
+                        <div class="stats-info">
+                            <span class="stats-label">Candidates Registered</span>
+                            <span class="stats-value" id="stat-total-candidates">0</span>
+                            <span class="stats-sub">Active job seekers</span>
+                        </div>
+                        <i data-lucide="users" class="stats-icon text-info"></i>
+                    </div>
+                </div>
+
+                <div class="admin-grid">
+                    <!-- Left: User Management (Toggle Candidates/Employers) -->
+                    <div class="admin-main">
+                        <div class="admin-tabs">
+                            <button class="admin-tab active" id="admin-subtab-candidates" onclick="switchAdminSubTab('candidates')">
+                                Candidates Management
+                            </button>
+                            <button class="admin-tab" id="admin-subtab-employers" onclick="switchAdminSubTab('employers')">
+                                Employers Management
+                            </button>
+                        </div>
+
+                        <!-- Candidates Management List -->
+                        <div class="admin-subcontent active" id="admin-content-candidates">
+                            <div class="glass-card list-card">
+                                <table class="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Joined Date</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-candidates-tbody">
+                                        <!-- Candidates rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Employers Management List -->
+                        <div class="admin-subcontent" id="admin-content-employers">
+                            <div class="glass-card list-card">
+                                <table class="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Company</th>
+                                            <th>Industry</th>
+                                            <th>Email</th>
+                                            <th>Location</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-employers-tbody">
+                                        <!-- Employers rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Quick Reporting & Status Breakdowns -->
+                    <div class="admin-sidebar">
+                        <h2>Application Distribution</h2>
+                        <div class="glass-card distribution-card">
+                            <h3>By Status</h3>
+                            <div id="stat-status-distribution" class="dist-list">
+                                <!-- Status bars -->
+                            </div>
+                        </div>
+                        <div class="glass-card distribution-card mt-4">
+                            <h3>By Job Type</h3>
+                            <div id="stat-type-distribution" class="dist-list">
+                                <!-- Job Type bars -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Modal 1: Register Candidate -->
+    <div class="modal-overlay" id="register-candidate-modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h2>Create Candidate Profile</h2>
+                <button class="modal-close" onclick="closeModal('register-candidate-modal')">&times;</button>
+            </div>
+            <form id="register-candidate-form" onsubmit="registerCandidate(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cand-firstname">First Name *</label>
+                        <input type="text" id="cand-firstname" required placeholder="e.g. John">
+                    </div>
+                    <div class="form-group">
+                        <label for="cand-lastname">Last Name *</label>
+                        <input type="text" id="cand-lastname" required placeholder="e.g. Doe">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="cand-email">Email Address *</label>
+                    <input type="email" id="cand-email" required placeholder="e.g. john.doe@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="cand-phone">Phone Number</label>
+                    <input type="text" id="cand-phone" placeholder="e.g. +1-555-0100">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('register-candidate-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: Register Employer -->
+    <div class="modal-overlay" id="register-employer-modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h2>Create Employer Profile</h2>
+                <button class="modal-close" onclick="closeModal('register-employer-modal')">&times;</button>
+            </div>
+            <form id="register-employer-form" onsubmit="registerEmployer(event)">
+                <div class="form-group">
+                    <label for="emp-name">Company Name *</label>
+                    <input type="text" id="emp-name" required placeholder="e.g. TechCorp Solutions">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="emp-email">Contact Email *</label>
+                        <input type="email" id="emp-email" required placeholder="e.g. jobs@techcorp.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="emp-website">Company Website</label>
+                        <input type="url" id="emp-website" placeholder="e.g. https://techcorp.com">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="emp-industry">Industry *</label>
+                        <input type="text" id="emp-industry" required placeholder="e.g. Information Technology">
+                    </div>
+                    <div class="form-group">
+                        <label for="emp-location">Headquarters Location *</label>
+                        <input type="text" id="emp-location" required placeholder="e.g. San Francisco, CA">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="emp-desc">Company Description</label>
+                    <textarea id="emp-desc" rows="3" placeholder="Tell candidates about your company..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('register-employer-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 3: Upload Resume -->
+    <div class="modal-overlay" id="upload-resume-modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h2>Upload Resume</h2>
+                <button class="modal-close" onclick="closeModal('upload-resume-modal')">&times;</button>
+            </div>
+            <form id="upload-resume-form" onsubmit="uploadResume(event)">
+                <div class="form-group">
+                    <label for="resume-file">Select Resume File (PDF, DOCX, or TXT) *</label>
+                    <input type="file" id="resume-file" required accept=".pdf,.docx,.txt">
+                    <p class="form-help">Max size 5MB. Files are stored securely on the server.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('upload-resume-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i data-lucide="upload"></i> Upload File
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 4: Post a Job -->
+    <div class="modal-overlay" id="post-job-modal">
+        <div class="modal-content glass-card max-w-lg">
+            <div class="modal-header">
+                <h2>Post a New Job Opening</h2>
+                <button class="modal-close" onclick="closeModal('post-job-modal')">&times;</button>
+            </div>
+            <form id="post-job-form" onsubmit="postJobListing(event)">
+                <div class="form-group">
+                    <label for="job-title">Job Title *</label>
+                    <input type="text" id="job-title" required placeholder="e.g. Senior Software Engineer">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="job-location">Location *</label>
+                        <input type="text" id="job-location" required placeholder="e.g. San Francisco, CA or Remote">
+                    </div>
+                    <div class="form-group">
+                        <label for="job-salary">Salary Range</label>
+                        <input type="text" id="job-salary" placeholder="e.g. $120,000 - $150,000">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="job-type">Job Type *</label>
+                    <select id="job-type" required>
+                        <option value="FullTime">Full Time</option>
+                        <option value="PartTime">Part Time</option>
+                        <option value="Contract">Contract</option>
+                        <option value="Remote">Remote</option>
+                        <option value="Internship">Internship</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="job-desc">Job Description *</label>
+                    <textarea id="job-desc" rows="4" required placeholder="Outline the responsibilities and role context..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="job-reqs">Requirements *</label>
+                    <textarea id="job-reqs" rows="4" required placeholder="List qualifications, skills, and experience (one per line)..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('post-job-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Publish Listing</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 5: View Job & Apply -->
+    <div class="modal-overlay" id="job-details-modal">
+        <div class="modal-content glass-card max-w-lg">
+            <div class="modal-header">
+                <div class="job-detail-title-group">
+                    <span id="job-details-company" class="company-badge">Company</span>
+                    <h2 id="job-details-title">Job Title</h2>
+                    <div class="job-meta-badges">
+                        <span class="badge" id="job-details-type">Full Time</span>
+                        <span class="badge" id="job-details-location"><i data-lucide="map-pin"></i> Location</span>
+                        <span class="badge" id="job-details-salary"><i data-lucide="dollar-sign"></i> Salary</span>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeModal('job-details-modal')">&times;</button>
+            </div>
+            <div class="job-detail-body">
+                <div class="detail-section">
+                    <h3>Role Description</h3>
+                    <p id="job-details-desc">Description content...</p>
+                </div>
+                <div class="detail-section mt-4">
+                    <h3>Requirements</h3>
+                    <div id="job-details-reqs" class="requirements-text">Requirements...</div>
+                </div>
+
+                <hr class="modal-divider">
+
+                <!-- Apply Form Block -->
+                <div id="apply-section" class="apply-form-section">
+                    <h3>Apply for this Position</h3>
+                    <div id="apply-error" class="alert alert-error hidden"></div>
+                    <div class="form-group mt-3">
+                        <label for="apply-notes">Cover Note / Additional Details</label>
+                        <textarea id="apply-notes" rows="3" placeholder="Introduce yourself to the employer..."></textarea>
+                    </div>
+                    <button class="btn btn-primary w-full mt-3" onclick="submitApplication()">
+                        <i data-lucide="send"></i> Submit My Application
+                    </button>
+                </div>
+                <div id="apply-closed-message" class="alert alert-info hidden">
+                    This position is closed and no longer accepting applications.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
